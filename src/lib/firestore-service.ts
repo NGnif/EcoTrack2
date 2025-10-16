@@ -8,15 +8,20 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Activity, ClientActivity } from '@/lib/types';
+import type { Activity } from '@/lib/types';
 import { calculateCo2e, emissionFactors } from '@/lib/calculator';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { seedData } from '@/lib/seed-data';
 
+type ClientTransport = { category: 'transport'; mode: 'car' | 'bus' | 'train' | 'bike' | 'walk'; distance: number };
+type ClientEnergy = { category: 'energy'; electricity: number; naturalGas?: number };
+type ClientDiet = { category: 'diet'; beef: number; chicken: number; vegetarian: number };
+type ClientActivity = ClientTransport | ClientEnergy | ClientDiet;
+
 export async function addActivity(
   userId: string,
-  activityData: Omit<ClientActivity, 'id' | 'co2e' | 'date' | 'userId'>
+  activityData: ClientActivity
 ) {
   const activityDataForCalc = { ...activityData } as any;
 
@@ -35,7 +40,7 @@ export async function addActivity(
 
   const co2e = calculateCo2e(activityDataForCalc, emissionFactors);
 
-  const finalData: Omit<Activity, 'id'> = {
+  const finalData: any = {
     userId,
     co2e,
     date: serverTimestamp(),
