@@ -26,7 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Car, Zap, Leaf } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { logActivityAction } from '@/actions/activities';
+import { addActivity as addActivityClient } from '@/lib/firestore-service';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
 
@@ -87,19 +87,18 @@ export function ActivityLogger() {
         }
 
         startTransition(async () => {
-            const idToken = await auth.currentUser!.getIdToken();
-            const result = await logActivityAction({ activity: data, idToken });
-            if(result.success) {
+            try {
+                await addActivityClient(auth.currentUser!.uid, data);
                 toast({
                     title: 'Activity Logged!',
                     description: `Your ${data.category} activity has been successfully recorded.`,
                 });
                 form.reset({ category: data.category, ...getInitialValues(data.category) });
-            } else {
+            } catch (error) {
                 toast({
                     variant: 'destructive',
                     title: 'Uh oh! Something went wrong.',
-                    description: result.error || 'There was a problem with your request.',
+                    description: 'Failed to log activity.',
                 });
             }
         });

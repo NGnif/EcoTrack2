@@ -43,17 +43,18 @@ export async function addActivity(
   };
 
   const activitiesRef = collection(db, 'activities');
-  addDoc(activitiesRef, finalData).catch(async (serverError) => {
+  try {
+    const docRef = await addDoc(activitiesRef, finalData);
+    return docRef.id;
+  } catch (serverError) {
     const permissionError = new FirestorePermissionError({
       path: activitiesRef.path,
       operation: 'create',
       requestResourceData: finalData,
     });
     errorEmitter.emit('permission-error', permissionError);
-    // We throw the original error so the UI can still catch it if needed,
-    // though the primary mechanism is the listener.
     throw serverError;
-  });
+  }
 }
 
 export async function seedActivities(userId: string) {
