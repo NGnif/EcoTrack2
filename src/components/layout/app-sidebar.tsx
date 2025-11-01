@@ -68,19 +68,32 @@ export function AppSidebar() {
         <SidebarMenu>
           {NAV_LINKS.map((link) => (
             <SidebarMenuItem key={link.href}>
-              <SheetClose asChild>
+              {isMobile ? (
+                <SheetClose asChild>
+                  <Link href={link.href} passHref>
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith(link.href)}
+                      tooltip={link.label}
+                      className="justify-start"
+                      onClick={() => setOpenMobile(false)}
+                    >
+                      <link.icon className="h-5 w-5" />
+                      <span className="group-data-[collapsible=icon]:hidden">{link.label}</span>
+                    </SidebarMenuButton>
+                  </Link>
+                </SheetClose>
+              ) : (
                 <Link href={link.href} passHref>
                   <SidebarMenuButton
                     isActive={pathname.startsWith(link.href)}
                     tooltip={link.label}
                     className="justify-start"
-                    onClick={() => { if (isMobile) setOpenMobile(false); }}
                   >
                     <link.icon className="h-5 w-5" />
                     <span className="group-data-[collapsible=icon]:hidden">{link.label}</span>
                   </SidebarMenuButton>
                 </Link>
-              </SheetClose>
+              )}
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
